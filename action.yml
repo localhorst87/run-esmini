@@ -28,7 +28,8 @@ inputs:
   token:
     description: 'Github token (required to download esmini release). For ease 
                   of use, I recommend to use the automatically created token of
-                  your workflow, accessible via ${{ secrets.GITHUB_TOKEN }}.'
+                  your workflow, accessible via the secrets.GITHUB_TOKEN env
+                  variable.'
     required: true
 runs:
   using: "composite"

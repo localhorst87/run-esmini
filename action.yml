@@ -25,6 +25,11 @@ inputs:
                   Example: "esmini-bin_Linux.zip"'
     required: false
     default: 'esmini-bin_Linux.zip'
+  token:
+    description: 'Github token (required to download esmini release). For ease 
+                  of use, I recommend to use the automatically created token of
+                  your workflow, accessible via ${{ secrets.GITHUB_TOKEN }}.'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -37,7 +42,7 @@ runs:
       shell: bash
       run: gh release download ${{ inputs.release }} --repo https://github.com/esmini/esmini --pattern ${{ inputs.asset }}
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ inputs.token }}
     - name: unzip release
       shell: bash
       run: unzip ${{ inputs.asset }}

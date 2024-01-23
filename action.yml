@@ -11,40 +11,42 @@ inputs:
                   the OpenSCENARIO standard can be set.
                   Example: "./path/to/parameter_set.xosc"'
     required: false
+  release:
+    description: 'Optionally, the name of the esmini release can be determined
+                  by indicating the according tag.
+                  Please note: Make sure to define the "asset" input to make
+                  sure the installation will succeed!
+                  Example: "v2.33.2"'                  
+    required: false
+    default: 'v2.36.2'
+  asset:
+    description: 'If a specific relase is determined, the asset of the relase 
+                  to install must be determined as well.
+                  Example: "esmini-bin_Linux.zip"'
+    required: false
+    default: 'esmini-bin_Linux.zip'
 runs:
   using: "composite"
   steps:
-    - name: Install esmini prerequisites
+    - name: Install prerequisites
       shell: bash
       run: |
         sudo apt update
-        sudo apt install -y build-essential gdb ninja-build git pkg-config \
-                            libgl1-mesa-dev libpthread-stubs0-dev libjpeg-dev \
-                            libxml2-dev libpng-dev libtiff5-dev libgdal-dev \
-                            libpoppler-dev libdcmtk-dev libgstreamer1.0-dev \
-                            libgtk2.0-dev libcairo2-dev libpoppler-glib-dev \
-                            libxrandr-dev libxinerama-dev curl cmake
-    - name: Checkout esmini
-      uses: actions/checkout@v4
-      with: 
-        repository: esmini/esmini
-        ref: d73f71336fdf7484ef0f3f558aa8e6118cba2a69
-        path: 'esmini'
-    - name: build esmini
-      working-directory: esmini
+        sudo apt install -y install unzip
+    - name: Download release
       shell: bash
-      run: |
-        mkdir build
-        cd build
-        cmake ..
-        cmake --build . --config Release --target install
+      run: gh release download ${{ inputs.release }} --repo https://github.com/esmini/esmini --pattern ${{ inputs.asset }}
+    - name: unzip release
+      shell: bash
+      run: unzip ${{ inputs.asset }}
     - name: run simulation
       shell: bash
       run: |
+        esminiExec=$(find -wholename "**/bin/esmini")
         if [ -n ${{ inputs.parameter-variation }} ]
           then
-            ./bin/esmini --osc ${{ inputs.xosc }} --param_dist ${{ inputs.parameter-variation }}
+            $esminiExec --headless --osc ${{ inputs.xosc }} --param_dist ${{ inputs.parameter-variation }}
           else
-            ./bin/esmini --osc ${{ inputs.xosc }}
+            $esminiExec --headless --osc ${{ inputs.xosc }}
           fi
         fi

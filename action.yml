@@ -36,6 +36,8 @@ runs:
     - name: Download release
       shell: bash
       run: gh release download ${{ inputs.release }} --repo https://github.com/esmini/esmini --pattern ${{ inputs.asset }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: unzip release
       shell: bash
       run: unzip ${{ inputs.asset }}

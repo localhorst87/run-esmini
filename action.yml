@@ -41,7 +41,7 @@ runs:
     - name: run simulation
       shell: bash
       run: |
-        if [ -n ${{ parameter-variation }} ]
+        if [ -n ${{ inputs.parameter-variation }} ]
           then
             ./bin/esmini --osc ${{ inputs.xosc }} --param_dist ${{ inputs.parameter-variation }}
           else

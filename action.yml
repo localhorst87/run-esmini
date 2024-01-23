@@ -57,5 +57,4 @@ runs:
             $esminiExec --headless --osc ${{ inputs.xosc }} --param_dist ${{ inputs.parameter-variation }}
           else
             $esminiExec --headless --osc ${{ inputs.xosc }}
-          fi
         fi

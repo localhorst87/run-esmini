@@ -32,7 +32,7 @@ runs:
       shell: bash
       run: |
         sudo apt update
-        sudo apt install -y install unzip
+        sudo apt install -y unzip
     - name: Download release
       shell: bash
       run: gh release download ${{ inputs.release }} --repo https://github.com/esmini/esmini --pattern ${{ inputs.asset }}

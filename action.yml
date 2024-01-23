@@ -1,0 +1,50 @@
+name: 'Run esmini'
+description: 'An action script that will perform simulations using the 
+              open-source scenario simulator esmini'
+inputs:
+  xosc: 
+    description: 'Path to the OpenSCENARIO file that shall be simulated
+                  Example: "./path/to/scenario.xosc"'
+    required: true
+  parameter-variation:
+    description: 'Optionally a parameter distribution file, according to
+                  the OpenSCENARIO standard can be set.
+                  Example: "./path/to/parameter_set.xosc"'
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Install esmini prerequisites
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential gdb ninja-build git pkg-config \
+                            libgl1-mesa-dev libpthread-stubs0-dev libjpeg-dev \
+                            libxml2-dev libpng-dev libtiff5-dev libgdal-dev \
+                            libpoppler-dev libdcmtk-dev libgstreamer1.0-dev \
+                            libgtk2.0-dev libcairo2-dev libpoppler-glib-dev \
+                            libxrandr-dev libxinerama-dev curl cmake
+    - name: Checkout esmini
+      uses: actions/checkout@v4
+      with: 
+        repository: esmini/esmini
+        ref: d73f71336fdf7484ef0f3f558aa8e6118cba2a69
+        path: 'esmini'
+    - name: build esmini
+      working-directory: esmini
+      shell: bash
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build . --config Release --target install
+    - name: run simulation
+      shell: bash
+      run: |
+        if [ -n ${{ parameter-variation }} ]
+          then
+            ./bin/esmini --osc ${{ inputs.xosc }} --param_dist ${{ inputs.parameter-variation }}
+          else
+            ./bin/esmini --osc ${{ inputs.xosc }}
+          fi
+        fi

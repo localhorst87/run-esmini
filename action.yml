@@ -36,6 +36,10 @@ inputs:
                   Example: "./path/to/results"'
     required: false
     default: './simulation-results'
+  timestep:
+    description: 'Specify the simulation timestep in seconds.
+                  Example: 0.05'
+    required: false
 runs:
   using: "composite"
   steps:

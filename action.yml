@@ -59,22 +59,30 @@ runs:
     - name: run simulation
       shell: bash
       run: |
+        # extract scenario name for naming of output files
         xoscPath=${{ inputs.xosc }}
         xoscPathSplitted=(${xoscPath//// })
         scenarioName=${xoscPathSplitted[-1]: 0: -5}   
         
+        # extract output directory without trailing "/" and create output dir
         outputDirectory=${{ inputs.result-dir }}
         if [[ ${outputDirectory: -1} = / ]]; then outputDirectory=${outputDirectory: 0:-1}; fi
+        mkdir -p $outputDirectory
         
+        # get parameters
         parameterVariationFile=${{ inputs.parameter-variation }}
         timestep=${{ inputs.timestep }}
 
+        # get esmini execution file
         esminiExec=$(find -wholename "**/bin/esmini")
 
+        # create command
         esminiCmd="${esminiExec} --headless --osc ${xoscPath} --record $outputDirectory/$scenarioName.dat --osi_file $outputDirectory/$scenarioName.osi --csv_logger $outputDirectory/$scenarioName.csv"
         if [[ -n $parameterVariationFile ]]; then esminiCmd="${esminiCmd} --param_dist ${parameterVariationFile}"; fi
         if [[ -n $timestep ]]; then esminiCmd="${esminiCmd} --fixed_timestep ${timestep} "; fi
 
+        # log the final command
         echo "executing: ${esminiCmd}"
 
+        # execute
         $esminiCmd

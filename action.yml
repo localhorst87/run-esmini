@@ -76,11 +76,15 @@ runs:
         # get esmini execution file
         esminiExec=$(find -wholename "**/bin/esmini")
 
-        # create command
         # work with absolute paths to compensate for the bug in esmini where recordings are written to the path where it is executed from, when using --param_dist (https://github.com/esmini/esmini/issues/526)
+        esminiExec=$(realpath $esminiExec);
+        xoscPath=$(realpath $xoscPath);
+        if [[ -n $parameterVariationFile ]]; then parameterVariationFile=$(realpath $parameterVariationFile); fi
         cd $outputDirectory
-        esminiCmd="$(realpath $esminiExec) --headless --osc $(realpath $xoscPath) --record $scenarioName.dat --osi_file $scenarioName.osi --csv_logger $scenarioName.csv"
-        if [[ -n $parameterVariationFile ]]; then esminiCmd="${esminiCmd} --param_dist $(realpath parameterVariationFile)"; fi
+        
+        # create command
+        esminiCmd="${esminiExec} --headless --osc ${xoscPath} --record $scenarioName.dat --osi_file $scenarioName.osi --csv_logger $scenarioName.csv"
+        if [[ -n $parameterVariationFile ]]; then esminiCmd="${esminiCmd} --param_dist ${parameterVariationFile}"; fi
         if [[ -n $timestep ]]; then esminiCmd="${esminiCmd} --fixed_timestep ${timestep} "; fi
 
         # log the final command

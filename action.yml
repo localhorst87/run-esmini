@@ -2,6 +2,12 @@ name: 'Run esmini'
 description: 'An action script that will perform simulations using the 
               open-source scenario simulator esmini'
 inputs:
+  token:
+    description: 'Github token (required to download esmini release). For ease 
+                  of use, I recommend to use the automatically created token of
+                  your workflow, accessible via the secrets.GITHUB_TOKEN env
+                  variable.'
+    required: true
   xosc: 
     description: 'Path to the OpenSCENARIO file that shall be simulated
                   Example: "./path/to/scenario.xosc"'
@@ -25,12 +31,11 @@ inputs:
                   Example: "esmini-bin_Linux.zip"'
     required: false
     default: 'esmini-bin_Linux.zip'
-  token:
-    description: 'Github token (required to download esmini release). For ease 
-                  of use, I recommend to use the automatically created token of
-                  your workflow, accessible via the secrets.GITHUB_TOKEN env
-                  variable.'
-    required: true
+  result-dir:
+    description: 'Location of where the result data will be stored.
+                  Example: "./path/to/results"'
+    required: false
+    default: './simulation-results'
 runs:
   using: "composite"
   steps:
@@ -50,11 +55,22 @@ runs:
     - name: run simulation
       shell: bash
       run: |
-        esminiExec=$(find -wholename "**/bin/esmini")
+        xoscPath=${{ inputs.xosc }}
+        xoscPathSplitted=(${xoscPath//// })
+        scenarioName=${xoscPathSplitted[-1]: 0: -5}   
+        
+        outputDirectory=${{ inputs.result-dir }}
+        if [[ ${outputDirectory: -1} = / ]]; then outputDirectory=${outputDirectory: 0:-1}; fi
+        
         parameterVariationFile=${{ inputs.parameter-variation }}
-        if [[ -n $parameterVariationFile ]]
-          then
-            $esminiExec --headless --osc ${{ inputs.xosc }} --param_dist ${{ inputs.parameter-variation }}
-          else
-            $esminiExec --headless --osc ${{ inputs.xosc }}
-        fi
+        timestep=${{ timestep }}
+
+        esminiExec=$(find -wholename "**/bin/esmini")
+
+        esminiCmd="${esminiExec} --headless --osc ${xoscPath} --record $outputDirectory/$scenarioName.dat --osi_file $outputDirectory/$scenarioName.osi --csv_logger $outputDirectory/$scenarioName.csv"
+        if [[ -n $parameterVariationFile ]]; then esminiCmd="${esminiCmd} --param_dist ${parameterVariationFile}"; fi
+        if [[ -n $timestep ]]; then esminiCmd="${esminiCmd} --fixed_timestep ${timestep} "; fi
+
+        echo "executing: ${esminiCmd}"
+
+        $esminiCmd

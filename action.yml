@@ -67,7 +67,7 @@ runs:
         if [[ ${outputDirectory: -1} = / ]]; then outputDirectory=${outputDirectory: 0:-1}; fi
         
         parameterVariationFile=${{ inputs.parameter-variation }}
-        timestep=${{ timestep }}
+        timestep=${{ inputs.timestep }}
 
         esminiExec=$(find -wholename "**/bin/esmini")
 
